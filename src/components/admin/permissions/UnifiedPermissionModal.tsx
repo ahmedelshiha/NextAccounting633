@@ -124,13 +124,23 @@ export default function UnifiedPermissionModal({
   allowCustomPermissions = true,
   targetName,
   targetEmail,
+  roleData,
 }: UnifiedPermissionModalProps) {
   // Responsive behavior: use sheet on mobile, dialog on desktop
   const isMobile = useMediaQuery('(max-width: 768px)')
-  
+  const { data: session } = useSession()
+
+  // Determine if this is a role creation/editing mode
+  const isRoleForm = mode === 'role-create' || mode === 'role-edit'
+
+  // Role form state
+  const [roleName, setRoleName] = useState(roleData?.name || '')
+  const [roleDescription, setRoleDescription] = useState(roleData?.description || '')
+
+  // Permission management state
   const [activeTab, setActiveTab] = useState<TabType>('role')
   const [selectedRole, setSelectedRole] = useState(currentRole)
-  const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>(currentPermissions)
+  const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>(roleData?.permissions || currentPermissions)
   const [searchQuery, setSearchQuery] = useState('')
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [changeHistory, setChangeHistory] = useState<PermissionChangeSet[]>([])
