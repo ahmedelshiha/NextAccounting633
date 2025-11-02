@@ -133,26 +133,36 @@ export function UserDataContextProvider({
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [activityError, setActivityError] = useState<string | null>(null)
 
+  // Use unified user service
+  const { fetchUsers, invalidateCache } = useUnifiedUserService()
+
   // Data operations
   const refreshUsers = useCallback(async () => {
     setRefreshing(true)
     setErrorMsg(null)
     try {
-      const response = await fetch('/api/admin/users?page=1&limit=50', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      })
+      // Invalidate cache to force fresh fetch
+      invalidateCache()
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
-      }
+      // Use unified service for robust data fetching
+      const fetchedUsers = await fetchUsers({ page: 1, limit: 50 })
+      setUsers(fetchedUsers)
 
-      const data = await response.json()
-      if (data.users) {
-        setUsers(data.users)
-      }
-      if (data.stats) {
-        setStats(data.stats)
+      // Fetch stats separately (if available)
+      try {
+        const statsResponse = await fetch('/api/admin/users/stats', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        })
+
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json()
+          if (statsData) {
+            setStats(statsData)
+          }
+        }
+      } catch (statsErr) {
+        console.error('Failed to fetch stats:', statsErr)
       }
     } catch (error) {
       console.error('Failed to refresh users:', error)
@@ -160,7 +170,7 @@ export function UserDataContextProvider({
     } finally {
       setRefreshing(false)
     }
-  }, [])
+  }, [fetchUsers, invalidateCache])
 
   const value: UserDataContextType = {
     // Data
