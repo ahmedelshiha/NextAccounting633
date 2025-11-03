@@ -206,42 +206,45 @@ export const ClientFormModal = React.forwardRef<HTMLDivElement, ClientFormModalP
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
+              <Label htmlFor="address" className="text-xs sm:text-sm">Address</Label>
               <Input
                 id="address"
                 placeholder="Street address"
                 value={form.formData.address || ''}
                 onChange={(e) => form.handleChange('address', e.target.value)}
                 disabled={form.isSubmitting}
+                className="text-sm"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
+                <Label htmlFor="city" className="text-xs sm:text-sm">City</Label>
                 <Input
                   id="city"
                   placeholder="City"
                   value={form.formData.city || ''}
                   onChange={(e) => form.handleChange('city', e.target.value)}
                   disabled={form.isSubmitting}
+                  className="text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="country">Country</Label>
+                <Label htmlFor="country" className="text-xs sm:text-sm">Country</Label>
                 <Input
                   id="country"
                   placeholder="Country"
                   value={form.formData.country || ''}
                   onChange={(e) => form.handleChange('country', e.target.value)}
                   disabled={form.isSubmitting}
+                  className="text-sm"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes" className="text-xs sm:text-sm">Notes</Label>
               <Textarea
                 id="notes"
                 placeholder="Additional notes"
@@ -249,6 +252,7 @@ export const ClientFormModal = React.forwardRef<HTMLDivElement, ClientFormModalP
                 onChange={(e) => form.handleChange('notes', e.target.value)}
                 disabled={form.isSubmitting}
                 rows={3}
+                className="text-sm"
               />
             </div>
 
