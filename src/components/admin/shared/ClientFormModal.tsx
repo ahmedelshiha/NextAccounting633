@@ -108,10 +108,10 @@ export const ClientFormModal = React.forwardRef<HTMLDivElement, ClientFormModalP
 
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent ref={ref} className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{title || defaultTitle}</DialogTitle>
-            <DialogDescription>{description || defaultDescription}</DialogDescription>
+        <DialogContent ref={ref} className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-lg sm:text-xl">{title || defaultTitle}</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">{description || defaultDescription}</DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
