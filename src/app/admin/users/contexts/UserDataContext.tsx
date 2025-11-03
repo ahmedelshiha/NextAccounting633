@@ -145,12 +145,26 @@ export function UserDataContextProvider({
   const [exporting, setExporting] = useState(false)
   const [updating, setUpdating] = useState(false)
 
+  // Real-time state
+  const [realtimeConnected, setRealtimeConnected] = useState(false)
+
   // Error state
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [activityError, setActivityError] = useState<string | null>(null)
 
   // Use unified user service
   const { fetchUsers, invalidateCache } = useUnifiedUserService()
+
+  // Subscribe to real-time user management events
+  const { isConnected: realtimeIsConnected } = useUserManagementRealtime({
+    debounceMs: 500,
+    autoRefresh: true
+  })
+
+  // Update real-time connection state
+  useEffect(() => {
+    setRealtimeConnected(realtimeIsConnected)
+  }, [realtimeIsConnected])
 
   // Data operations
   const refreshUsers = useCallback(async () => {
