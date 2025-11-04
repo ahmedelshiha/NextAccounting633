@@ -50,6 +50,13 @@ export const GET = withTenantContext(async (request: Request) => {
             name: true,
             email: true,
             role: true,
+            status: true,
+            availabilityStatus: true,
+            department: true,
+            position: true,
+            tier: true,
+            experienceYears: true,
+            image: true,
             createdAt: true,
             updatedAt: true
           },
