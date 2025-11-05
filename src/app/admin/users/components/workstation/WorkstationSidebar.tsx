@@ -88,7 +88,9 @@ export const WorkstationSidebar = memo(function WorkstationSidebar({
               </div>
               <div className="stat-item">
                 <span className="stat-label">Active</span>
-                <span className="stat-value">{((stats as any).clients || 0) + ((stats as any).staff || 0) + ((stats as any).admins || 0) || 0}</span>
+                {/* TODO: Phase 3 - Replace with dedicated stats.active property for better performance */}
+                {/* For now, calculate as sum of clients + staff + admins, but stats object should include a direct 'active' count */}
+                <span className="stat-value">{(stats as any).active !== undefined ? (stats as any).active : ((stats as any).clients || 0) + ((stats as any).staff || 0) + ((stats as any).admins || 0) || 0}</span>
               </div>
               <div className="stat-item">
                 <span className="stat-label">Pending</span>
