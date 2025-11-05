@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 import { WorkstationContextType, QuickStatsData } from '../types/workstation'
-import { UserFilters } from './index'
+import { UserFilters } from '../components/AdvancedUserFilters'
 
 /**
  * WorkstationProvider
