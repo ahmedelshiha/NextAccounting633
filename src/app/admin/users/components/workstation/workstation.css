@@ -577,12 +577,17 @@
   }
 
   .action-btn {
-    padding: 0.5rem 0.75rem;
+    padding: 0.625rem 0.75rem;
     font-size: 0.75rem;
+    min-height: 44px;
   }
 
   .sidebar-views-container {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .view-btn {
+    min-height: 44px;
   }
 }
 
