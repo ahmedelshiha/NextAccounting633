@@ -20,26 +20,33 @@ const AuditTab = lazy(() => import('./components/tabs/AuditTab').then(m => ({ de
 const AdminTab = lazy(() => import('./components/tabs/AdminTab').then(m => ({ default: m.AdminTab })))
 
 /**
- * Enterprise Users Page - Phase 4 Implementation
- * 
- * Main orchestrator component that implements the 5-tab interface:
- * 1. Dashboard (Operations overview) - Phase 4a
- * 2. Workflows (Workflow management) - Phase 4b
- * 3. Bulk Operations (Batch operations) - Phase 4c
- * 4. Audit (Compliance & audit trail) - Phase 4d
- * 5. Admin (System configuration) - Phase 4e
- * 
+ * Enterprise Users Page - Phase 6 Implementation
+ *
+ * Dual-mode interface with feature flag control:
+ *
+ * WORKSTATION MODE (NEXT_PUBLIC_WORKSTATION_ENABLED=true):
+ * - 3-column layout: Sidebar | Main Content | Insights Panel
+ * - Blue header with action buttons
+ * - KPI metric cards grid
+ * - User directory with virtual scrolling
+ * - Sticky bulk operations bar
+ *
+ * TAB MODE (NEXT_PUBLIC_WORKSTATION_ENABLED=false):
+ * - Tab-based navigation (Dashboard, Workflows, Bulk Ops, Audit, RBAC, Admin)
+ * - Legacy multi-tab interface for backward compatibility
+ *
  * Architecture:
- * - Tab-based navigation with React Context
+ * - Feature flag controls layout mode (workstation vs tabs)
  * - Server-side data fetching via layout.tsx
  * - Client-side state management for filters and selections
  * - Dynamic imports for heavy modals
  * - Performance optimized with code splitting
- * 
- * Timeline: 9 weeks, 195 developer hours
- * Status: Phase 4a in progress
+ *
+ * Timeline: 9 weeks, 195 developer hours + Phase 6 deployment
+ * Status: Phase 6 feature flag switchable
  */
 export function EnterpriseUsersPage() {
+  const isWorkstationEnabled = process.env.NEXT_PUBLIC_WORKSTATION_ENABLED === 'true'
   const [activeTab, setActiveTab] = useState<TabType>('dashboard')
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false)
   // Performance: start render measure (ended in effects below)
