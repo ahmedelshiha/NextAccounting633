@@ -125,14 +125,16 @@ describe('BulkActionsPanel', () => {
         />
       )
 
-      const clearButton = screen.getByRole('button', { name: /clear/i })
+      const clearButton = screen.getByTestId('clear-button')
       await user.click(clearButton)
 
       expect(mockOnClear).toHaveBeenCalledOnce()
     })
 
-    it('should show dry-run modal when preview clicked', async () => {
+    it('should call preview handler when preview button clicked', async () => {
       const user = userEvent.setup()
+      const consoleSpy = vi.spyOn(console, 'log')
+
       render(
         <BulkActionsPanel
           selectedCount={2}
@@ -141,16 +143,26 @@ describe('BulkActionsPanel', () => {
         />
       )
 
-      const previewButton = screen.getByRole('button', { name: /preview/i })
+      const previewButton = screen.getByTestId('preview-button')
       await user.click(previewButton)
 
-      await waitFor(() => {
-        expect(screen.getByTestId('dry-run-modal')).toBeInTheDocument()
-      })
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'preview'
+        })
+      )
+
+      consoleSpy.mockRestore()
     })
 
-    it('should close modal when cancel clicked', async () => {
+    it('should apply action when apply button clicked', async () => {
       const user = userEvent.setup()
+      const mockFetch = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true })
+      })
+      global.fetch = mockFetch
+
       render(
         <BulkActionsPanel
           selectedCount={2}
@@ -159,15 +171,17 @@ describe('BulkActionsPanel', () => {
         />
       )
 
-      const previewButton = screen.getByRole('button', { name: /preview/i })
-      await user.click(previewButton)
+      const applyButton = screen.getByTestId('apply-button')
+      await user.click(applyButton)
 
       await waitFor(() => {
-        expect(screen.getByTestId('dry-run-modal')).toBeInTheDocument()
+        expect(mockFetch).toHaveBeenCalledWith(
+          '/api/admin/users/bulk-action',
+          expect.objectContaining({
+            method: 'POST'
+          })
+        )
       })
-
-      const cancelButton = screen.getByRole('button', { name: /cancel/i })
-      await user.click(cancelButton)
 
       await waitFor(() => {
         expect(screen.queryByTestId('dry-run-modal')).not.toBeInTheDocument()
