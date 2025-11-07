@@ -1,17 +1,23 @@
-import React from 'react'
+import React, { createContext, useContext } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import { vi, describe, it, beforeEach, expect } from 'vitest'
 
-// Create mock function first
-const mockUseUsersContext = vi.fn(() => ({
+// Create a test wrapper provider
+const TestContext = createContext<any>(null)
+
+let contextValue = {
   users: [],
   isLoading: false,
   error: null
-}))
+}
+
+const TestProvider = ({ children }: { children: React.ReactNode }) => (
+  <TestContext.Provider value={contextValue}>{children}</TestContext.Provider>
+)
 
 // Setup mocks
 vi.mock('../../contexts/UsersContextProvider', () => ({
-  useUsersContext: mockUseUsersContext
+  useUsersContext: () => useContext(TestContext)
 }))
 
 vi.mock('../../OperationsOverviewCards', () => ({
@@ -34,13 +40,15 @@ import OverviewCards from '../OverviewCards'
 
 describe('OverviewCards', () => {
   beforeEach(() => {
-    mockUseUsersContext.mockClear()
-    mockUseUsersContext.mockReturnValue({
+    contextValue = {
       users: [],
       isLoading: false,
       error: null
-    })
+    }
   })
+
+  const renderWithProvider = (component: React.ReactElement) =>
+    render(<TestProvider>{component}</TestProvider>)
 
   describe('Loading State', () => {
     it('should show skeleton while loading', () => {
