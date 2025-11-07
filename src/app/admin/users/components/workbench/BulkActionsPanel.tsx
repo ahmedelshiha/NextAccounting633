@@ -163,6 +163,7 @@ export default function BulkActionsPanel({
             disabled={isApplying}
             size="sm"
             aria-label="Apply bulk action to selected users"
+            data-testid="apply-button"
           >
             {isApplying ? 'Applying...' : 'Apply Changes'}
           </Button>
@@ -172,6 +173,7 @@ export default function BulkActionsPanel({
             className="admin-bulk-actions-clear"
             aria-label="Clear selection"
             title="Clear selection"
+            data-testid="clear-button"
           >
             <X className="w-4 h-4" />
           </button>
