@@ -1,6 +1,6 @@
 import React from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
-import { vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { vi, describe, it, beforeEach, expect } from 'vitest'
 import {
   BuilderHeaderSlot,
   BuilderMetricsSlot,
@@ -8,17 +8,7 @@ import {
   BuilderFooterSlot
 } from '../BuilderSlots'
 
-// Mock the useBuilderContent hook
-vi.mock('@/hooks/useBuilderContent', () => ({
-  useBuilderContent: vi.fn(() => ({
-    content: null,
-    isLoading: false,
-    error: null,
-    isEnabled: false
-  }))
-}))
-
-// Mock child components
+// Mock child components first
 vi.mock('../QuickActionsBar', () => ({
   default: () => <div data-testid="quick-actions-bar-fallback">Default QuickActionsBar</div>
 }))
@@ -35,9 +25,17 @@ vi.mock('../BulkActionsPanel', () => ({
   default: (props: any) => <div data-testid="bulk-actions-panel-fallback">Default BulkActionsPanel</div>
 }))
 
-import { useBuilderContent } from '@/hooks/useBuilderContent'
+// Mock the useBuilderContent hook
+const mockUseBuilderContent = vi.fn(() => ({
+  content: null,
+  isLoading: false,
+  error: null,
+  isEnabled: false
+}))
 
-const mockUseBuilderContent = useBuilderContent as any
+vi.mock('@/hooks/useBuilderContent', () => ({
+  useBuilderContent: mockUseBuilderContent
+}))
 
 describe('BuilderSlots Components', () => {
   beforeEach(() => {
