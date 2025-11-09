@@ -300,8 +300,8 @@ export const POST = withTenantContext(async (request: NextRequest) => {
       }
     })
 
-    const audit = new AuditLogService()
-    await AuditLogService.createAuditLog({ tenantId: ctx.tenantId, action: 'user.create', userId: newUser.id, metadata: { name, email, role } })
+    
+    await AuditLogService.createAuditLog({ tenantId: tenantId!, action: 'user.create', userId: newUser.id, metadata: { name, email, role } })
 
     return NextResponse.json(newUser, { status: 201 })
   } catch (error: any) {
@@ -357,8 +357,8 @@ export const PUT = withTenantContext(async (request: NextRequest) => {
       }
     })
 
-    const audit = new AuditLogService()
-    await AuditLogService.createAuditLog({ tenantId: ctx.tenantId, action: 'user.update', userId: updatedUser.id, metadata: { name, email, role } })
+    
+    await AuditLogService.createAuditLog({ tenantId: tenantId!, action: 'user.update', userId: updatedUser.id, metadata: { name, email, role } })
 
     return NextResponse.json(updatedUser, { status: 200 })
   } catch (error: any) {
