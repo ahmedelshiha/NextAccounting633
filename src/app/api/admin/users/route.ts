@@ -254,7 +254,7 @@ export const GET = withTenantContext(async (request: Request) => {
  */
 export const POST = withTenantContext(async (request: NextRequest) => {
   const ctx = requireTenantContext()
-  const tenantId = ctx.tenantId ?? null
+  const tenantId = ctx.tenantId ?? undefined
 
   try {
     const postUserRole = ctx.role ?? ''
@@ -366,4 +366,3 @@ export const PUT = withTenantContext(async (request: NextRequest) => {
     return respond.serverError('An internal server error occurred.')
   }
 })
-
