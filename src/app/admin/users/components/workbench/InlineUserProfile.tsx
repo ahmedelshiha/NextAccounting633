@@ -7,10 +7,9 @@ import { OverviewTab } from '../UserProfileDialog/OverviewTab'
 import { DetailsTab } from '../UserProfileDialog/DetailsTab'
 import { ActivityTab } from '../UserProfileDialog/ActivityTab'
 import { SettingsTab } from '../UserProfileDialog/SettingsTab'
+import { PermissionsTab } from '../UserProfileDialog/PermissionsTab'
 import { useUserActions } from '../../hooks/useUserActions'
 import { toast } from 'sonner'
-import UnifiedPermissionModal from '@/components/admin/permissions/UnifiedPermissionModal'
-import type { Permission } from '@/lib/permissions'
 
 export default function InlineUserProfile({ onBack }: { onBack: () => void }) {
   const {
@@ -22,9 +21,7 @@ export default function InlineUserProfile({ onBack }: { onBack: () => void }) {
     setSelectedUser,
     editForm,
     setUpdating,
-    updating,
-    permissionModalOpen,
-    setPermissionModalOpen
+    updating
   } = useUsersContext()
 
   const { updateUser } = useUserActions({
