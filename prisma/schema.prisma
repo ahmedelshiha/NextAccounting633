@@ -80,6 +80,10 @@ model User {
   grantedPermissions        UserPermission[]        @relation("GrantedBy")
   userPermissions           UserPermission[]        @relation("UserPermissions")
   userProfile               UserProfile?
+  filterPresets             FilterPreset[]
+  presetSharesOwned         PresetShare[]           @relation("PresetShareOwner")
+  presetSharesReceived      PresetShare[]           @relation("PresetShareRecipient")
+  presetShareLogs           PresetShareLog[]
   manager                   User?                   @relation("ManagerEmployee", fields: [managerId], references: [id])
   employees                 User[]                  @relation("ManagerEmployee")
   tenant                    Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -140,6 +144,73 @@ model UserProfile {
 
   @@index([userId])
   @@map("user_profiles")
+}
+
+model FilterPreset {
+  id            String   @id @default(cuid())
+  tenantId      String
+  userId        String
+  name          String   @db.VarChar(255)
+  description   String?
+  filters       Json     // Serialized FilterState object
+  isPinned      Boolean  @default(false)
+  usageCount    Int      @default(0)
+  lastUsedAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  shares        PresetShare[]
+
+  @@unique([userId, tenantId, name])
+  @@index([tenantId, userId])
+  @@index([userId, isPinned])
+  @@index([userId, updatedAt(sort: Desc)])
+  @@map("filter_presets")
+}
+
+model PresetShare {
+  id              String   @id @default(cuid())
+  presetId        String
+  ownerId         String
+  sharedWithUserId String?  // null for team share
+  teamId          String?   // for team-level sharing
+  permissionLevel String   @default("viewer") // viewer, editor, admin
+  expiresAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  preset          FilterPreset @relation(fields: [presetId], references: [id], onDelete: Cascade)
+  owner           User         @relation("PresetShareOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  sharedWithUser  User?        @relation("PresetShareRecipient", fields: [sharedWithUserId], references: [id], onDelete: Cascade)
+
+  @@unique([presetId, sharedWithUserId])
+  @@index([presetId])
+  @@index([ownerId])
+  @@index([sharedWithUserId])
+  @@index([createdAt(sort: Desc)])
+  @@map("preset_shares")
+}
+
+model PresetShareLog {
+  id              String   @id @default(cuid())
+  presetId        String
+  userId          String
+  eventType       String   // CREATED, UPDATED, DELETED, SHARED, REVOKED, ACCESSED
+  eventDetails    Json?
+  ipAddress       String?
+  createdAt       DateTime @default(now())
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([presetId, createdAt(sort: Desc)])
+  @@index([userId, eventType, createdAt(sort: Desc)])
+  @@index([eventType, createdAt(sort: Desc)])
+  @@map("preset_share_logs")
 }
 
 model Account {
@@ -245,6 +316,7 @@ model Tenant {
   userWorkflows         UserWorkflow[]
   workflowTemplates     WorkflowTemplate[]
   bulkOperations        BulkOperation[]
+  filterPresets         FilterPreset[]
   userManagementSettings UserManagementSettings?
 
   @@index([status])
