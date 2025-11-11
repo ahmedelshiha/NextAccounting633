@@ -104,24 +104,23 @@ export const VirtualList = React.memo(
       [itemSize]
     )
 
-    return React.createElement(
-      List,
-      {
-        ref,
-        height,
-        itemCount: items.length,
-        itemSize: itemSizeGetter,
-        width,
-        overscanCount,
-        onScroll: handleScroll,
-        className
-      } as any,
-      ({ index, style }: { index: number; style: React.CSSProperties }) =>
-        React.createElement(
-          'div',
-          { key: index, style },
-          renderItem(items[index], index, style)
-        )
-    )
+    const Row = ({ index, style }: { index: number; style: React.CSSProperties }) =>
+      React.createElement(
+        'div',
+        { key: index, style },
+        renderItem(items[index], index, style)
+      )
+
+    return React.createElement(List, {
+      ref,
+      height,
+      itemCount: items.length,
+      itemSize: itemSizeGetter,
+      width,
+      overscanCount,
+      onScroll: handleScroll,
+      className,
+      children: Row
+    } as any)
   })
 )
