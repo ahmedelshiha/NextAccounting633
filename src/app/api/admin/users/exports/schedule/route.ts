@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { requireTenantContext, withTenantContext } from '@/lib/tenant-context'
+import { requireTenantContext } from '@/lib/tenant-context'
 import { hasPermission } from '@/lib/permissions'
 import { rateLimit } from '@/lib/rate-limit'
 
@@ -9,63 +9,49 @@ import { rateLimit } from '@/lib/rate-limit'
  * List all export schedules for the current user/tenant
  */
 export async function GET(request: NextRequest) {
-  try {
-    // Rate limiting
-    const identifier = request.headers.get('x-forwarded-for') || 'anonymous'
-    const { success } = await rateLimit(identifier)
-    if (!success) {
-      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
-    }
+  return requireTenantContext(request, async (context) => {
+    try {
+      // Rate limiting
+      const identifier = request.headers.get('x-forwarded-for') || 'anonymous'
+      const { success } = await rateLimit(identifier)
+      if (!success) {
+        return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+      }
 
-    // Authentication
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Permission check
-    const hasAccess = await hasPermission(session.user.id, 'admin:users:export')
-    if (!hasAccess) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    // Get tenant ID from user
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { tenantId: true }
-    })
-
-    if (!user?.tenantId) {
-      return NextResponse.json({ error: 'User not associated with tenant' }, { status: 400 })
-    }
+      // Permission check
+      const hasAccess = await hasPermission(context.userId, 'admin:users:export')
+      if (!hasAccess) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
 
       // Get schedules from database
       const schedules = await prisma.exportSchedule.findMany({
         where: {
           tenantId: context.tenantId
         },
-      include: {
-        _count: {
-          select: { executions: true }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    })
+        include: {
+          _count: {
+            select: { executions: true }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      })
 
-    return NextResponse.json({
-      success: true,
-      schedules: schedules.map(s => ({
-        ...s,
-        executionCount: s._count.executions
-      }))
-    })
-  } catch (error) {
-    console.error('Failed to fetch export schedules:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch export schedules' },
-      { status: 500 }
-    )
-  }
+      return NextResponse.json({
+        success: true,
+        schedules: schedules.map(s => ({
+          ...s,
+          executionCount: s._count.executions
+        }))
+      })
+    } catch (error) {
+      console.error('Failed to fetch export schedules:', error)
+      return NextResponse.json(
+        { error: 'Failed to fetch export schedules' },
+        { status: 500 }
+      )
+    }
+  })
 }
 
 /**
@@ -73,119 +59,105 @@ export async function GET(request: NextRequest) {
  * Create a new export schedule
  */
 export async function POST(request: NextRequest) {
-  try {
-    // Rate limiting
-    const identifier = request.headers.get('x-forwarded-for') || 'anonymous'
-    const { success } = await rateLimit(identifier)
-    if (!success) {
-      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
-    }
+  return requireTenantContext(request, async (context) => {
+    try {
+      // Rate limiting
+      const identifier = request.headers.get('x-forwarded-for') || 'anonymous'
+      const { success } = await rateLimit(identifier)
+      if (!success) {
+        return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+      }
 
-    // Authentication
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+      // Permission check
+      const hasAccess = await hasPermission(context.userId, 'admin:users:export')
+      if (!hasAccess) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
 
-    // Permission check
-    const hasAccess = await hasPermission(session.user.id, 'admin:users:export')
-    if (!hasAccess) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    // Get user and tenant
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { tenantId: true }
-    })
-
-    if (!user?.tenantId) {
-      return NextResponse.json({ error: 'User not associated with tenant' }, { status: 400 })
-    }
-
-    // Parse request body
-    const body = await request.json()
-    const {
-      name,
-      description,
-      frequency,
-      format,
-      recipients,
-      dayOfWeek,
-      dayOfMonth,
-      time,
-      emailSubject,
-      emailBody,
-      filterPresetId,
-      isActive = true
-    } = body
-
-    // Validate required fields
-    if (!name || !frequency || !format || !recipients || recipients.length === 0) {
-      return NextResponse.json(
-        { error: 'Missing required fields: name, frequency, format, recipients' },
-        { status: 400 }
-      )
-    }
-
-    // Validate format
-    if (!['csv', 'xlsx', 'json', 'pdf'].includes(format)) {
-      return NextResponse.json({ error: 'Invalid export format' }, { status: 400 })
-    }
-
-    // Validate email addresses
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (recipients.some((email: string) => !emailRegex.test(email))) {
-      return NextResponse.json({ error: 'One or more recipient emails are invalid' }, { status: 400 })
-    }
-
-    // Check schedule limit (max 20 per tenant)
-    const existingSchedules = await prisma.exportSchedule.count({
-      where: { tenantId: user.tenantId }
-    })
-
-    if (existingSchedules >= 20) {
-      return NextResponse.json(
-        { error: 'Maximum number of export schedules (20) reached for this tenant' },
-        { status: 400 }
-      )
-    }
-
-    // Create the schedule in database
-    const schedule = await prisma.exportSchedule.create({
-      data: {
-        id: crypto.getRandomUUID(),
+      // Parse request body
+      const body = await request.json()
+      const {
         name,
         description,
         frequency,
         format,
         recipients,
-        dayOfWeek: dayOfWeek || null,
-        dayOfMonth: dayOfMonth || null,
-        time: time || '09:00',
+        dayOfWeek,
+        dayOfMonth,
+        time,
         emailSubject,
         emailBody,
-        filterPresetId: filterPresetId || null,
-        isActive,
-        tenantId: user.tenantId,
-        userId: session.user.id,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    })
+        filterPresetId,
+        isActive = true
+      } = body
 
-    return NextResponse.json({
-      success: true,
-      schedule,
-      message: 'Export schedule created successfully'
-    })
-  } catch (error) {
-    console.error('Failed to create export schedule:', error)
-    return NextResponse.json(
-      { error: 'Failed to create export schedule' },
-      { status: 500 }
-    )
-  }
+      // Validate required fields
+      if (!name || !frequency || !format || !recipients || recipients.length === 0) {
+        return NextResponse.json(
+          { error: 'Missing required fields: name, frequency, format, recipients' },
+          { status: 400 }
+        )
+      }
+
+      // Validate format
+      if (!['csv', 'xlsx', 'json', 'pdf'].includes(format)) {
+        return NextResponse.json({ error: 'Invalid export format' }, { status: 400 })
+      }
+
+      // Validate email addresses
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (recipients.some((email: string) => !emailRegex.test(email))) {
+        return NextResponse.json({ error: 'One or more recipient emails are invalid' }, { status: 400 })
+      }
+
+      // Check schedule limit (max 20 per tenant)
+      const existingSchedules = await prisma.exportSchedule.count({
+        where: { tenantId: context.tenantId }
+      })
+
+      if (existingSchedules >= 20) {
+        return NextResponse.json(
+          { error: 'Maximum number of export schedules (20) reached for this tenant' },
+          { status: 400 }
+        )
+      }
+
+      // Create the schedule in database
+      const schedule = await prisma.exportSchedule.create({
+        data: {
+          id: crypto.getRandomUUID(),
+          name,
+          description,
+          frequency,
+          format,
+          recipients,
+          dayOfWeek: dayOfWeek || null,
+          dayOfMonth: dayOfMonth || null,
+          time: time || '09:00',
+          emailSubject,
+          emailBody,
+          filterPresetId: filterPresetId || null,
+          isActive,
+          tenantId: context.tenantId,
+          userId: context.userId,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      })
+
+      return NextResponse.json({
+        success: true,
+        schedule,
+        message: 'Export schedule created successfully'
+      })
+    } catch (error) {
+      console.error('Failed to create export schedule:', error)
+      return NextResponse.json(
+        { error: 'Failed to create export schedule' },
+        { status: 500 }
+      )
+    }
+  })
 }
 
 /**
@@ -216,7 +188,7 @@ export async function PATCH(request: NextRequest) {
             id: { in: scheduleIds }
           },
           data: {
-            isActive: { not: true } // This is a workaround; ideally use toggle logic
+            isActive: { not: true }
           }
         })
 
