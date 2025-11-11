@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs'
+import { createHmac } from 'crypto'
 
 export interface WebhookConfig {
   url: string
