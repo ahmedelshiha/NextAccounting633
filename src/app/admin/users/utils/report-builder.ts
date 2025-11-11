@@ -396,7 +396,7 @@ function generateGroupedTableRows(
   )
 
   Object.entries(grouped).forEach(([groupValue, groupRows]: [string, unknown[]]) => {
-    html += `<tr class="group-header"><td colspan="${columns.length}">${escapeHTMLChars(String(groupValue))}</td></tr>`
+    html += `<tr class="group-header"><td colspan="${columns.length}">${escapeHTMLChars(`${groupValue}`)}</td></tr>`
 
     (groupRows as Array<Record<string, unknown>>).forEach(row => {
       html += '<tr>'
