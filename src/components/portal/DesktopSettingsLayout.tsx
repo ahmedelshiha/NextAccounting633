@@ -106,13 +106,13 @@ export function DesktopSettingsLayout({
           {/* Breadcrumb */}
           <div className="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
             <nav className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-              <a href="/" className="hover:text-blue-600 dark:hover:text-blue-400">
+              <Link href="/" className="hover:text-blue-600 dark:hover:text-blue-400">
                 Home
-              </a>
+              </Link>
               <span className="mx-2">/</span>
-              <a href="/portal/settings" className="hover:text-blue-600 dark:hover:text-blue-400">
+              <Link href="/portal/settings" className="hover:text-blue-600 dark:hover:text-blue-400">
                 Settings
-              </a>
+              </Link>
               <span className="mx-2">/</span>
               <span className="text-gray-900 dark:text-white font-medium">
                 {navItems.find((item) => item.id === currentTab)?.label}

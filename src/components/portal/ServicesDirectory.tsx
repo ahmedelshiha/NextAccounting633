@@ -278,7 +278,7 @@ export function ServicesDirectory() {
       {/* Info Alert */}
       <Alert>
         <AlertDescription>
-          Request a service to start working with our team. You'll be able to track your request and
+          Request a service to start working with our team. You&apos;ll be able to track your request and
           communicate directly with our specialists through the messaging system.
         </AlertDescription>
       </Alert>
