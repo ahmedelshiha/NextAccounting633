@@ -1,10 +1,18 @@
 import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-04-10',
+  apiVersion: '2025-09-30.clover',
 })
+
+export interface DunningResult {
+  processed: number
+  retried: number
+  escalated: number
+  failed: number
+}
 
 export interface DunningConfig {
   maxRetries: number
