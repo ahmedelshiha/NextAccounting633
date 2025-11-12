@@ -143,9 +143,12 @@ describe('Portal RBAC System', () => {
         currentUserId: 'user-2',
       }
 
-      expect(checkPermission('FINANCE_MANAGER', 'documents.delete', ownerContext)).toBe(true)
-      expect(checkPermission('FINANCE_MANAGER', 'documents.delete', nonOwnerContext)).toBe(true) // Finance manager can delete
+      // ACCOUNTANT has documents.delete, so should pass
+      expect(checkPermission('ACCOUNTANT', 'documents.delete', ownerContext)).toBe(true)
       expect(checkPermission('ACCOUNTANT', 'documents.delete', nonOwnerContext)).toBe(false)
+
+      // CLIENT_OWNER can delete any document
+      expect(checkPermission('CLIENT_OWNER', 'documents.delete', nonOwnerContext)).toBe(true)
     })
   })
 
