@@ -68,7 +68,7 @@ For each task:
 | Icon | Status | Description |
 |------|--------|-------------|
 | ✅ | Completed | Fully implemented and tested |
-| ⚠️ | In Progress | Currently working on |
+| ⚠��� | In Progress | Currently working on |
 | ❌ | Blocked | Cannot proceed due to dependencies |
 | 🔄 | Needs Review | Implementation complete, awaiting validation |
 | ⏸️ | Paused | Temporarily halted |
@@ -116,21 +116,39 @@ Epic: ENT-1 Entity & People management
   - Tests prepared for auth flows
 
 - ✅ TCK-1.5 Search & bulk import
-  - ✅ CSV import service and validation
-    - validateCsvData function with schema validation
-    - generateCsvTemplate for user download
-    - processCsvImport for job creation
-  - ✅ CSV import API endpoint
-    - POST /api/entities/import-csv for file upload
-    - GET /api/entities/import-csv?format=template for template
-    - Validation with error reporting
-  - ✅ CSV import UI component
-    - CsvImportDialog with drag-and-drop
-    - Validation error display
+  - ✅ CSV import service and validation (COMPLETE)
+    - validateCsvData function with schema validation (zod-based)
+    - generateCsvTemplate for user download (country-specific examples)
+    - processCsvImport creates actual Redis-backed background jobs
+  - ✅ CSV import API endpoints (COMPLETE)
+    - POST /api/entities/import-csv for file upload (10MB max, validation)
+    - GET /api/entities/import-csv?format=template for template download
+    - GET /api/entities/import-csv/status for job tracking
+    - Validation with error reporting (first 10 errors shown)
+  - ✅ CSV import UI component (COMPLETE)
+    - CsvImportDialog with drag-and-drop and file picker
+    - Validation error display with row-by-row detail
     - Progress tracking and completion states
+  - ✅ Background job processing (NEW - COMPLETE)
+    - src/lib/jobs/csv-import.ts: Redis-backed job state machine
+    - Job states: PENDING → PROCESSING → SUCCESS/PARTIAL_SUCCESS/FAILED
+    - Entity row processing with validation and duplicate detection
+    - Error tracking per row with detailed messages
+    - nethily/functions/cron-csv-import.ts: 60s cron processor
+    - Support for batch processing (up to 10 jobs per cron run)
+    - TTL-based cleanup (1 hour expiry)
+  - ✅ Frontend polling hook (NEW - COMPLETE)
+    - useCsvImportStatus: Real-time job status polling
+    - Progress percentage calculation
+    - Auto-detect completion
+    - Error handling with timeout support
+  - ✅ Unit tests (COMPLETE)
+    - 300 lines of test coverage
+    - Job initialization, state management, processing
+    - Error handling and lifecycle tests
 
 ### Phase 1.1 — Business Account Setup Wizard (Modal)
-**Status: ✅ CORE COMPLETE (Desktop), ⏳ Mobile/Testing PENDING**
+**Status: ✅ CORE COMPLETE (Desktop), ��� Mobile/Testing PENDING**
 
 Epic: ENT-1.1 Setup wizard
 - ✅ TCK-1.1a Modal UI (desktop/web)
