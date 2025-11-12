@@ -1,5 +1,7 @@
 # Client Portal Upgrade — Phased Roadmap with Epics & Tickets
 
+Reference: See the full specification in [Client Portal Upgrade Plan](./client-portal-upgrade-plan.md).
+
 This roadmap maps planned capabilities to the existing Next.js/Prisma codebase. It references concrete files and scripts, aligns with the enterprise addendum, and is structured for import into Linear/Jira.
 
 Repo audit (highlights)
