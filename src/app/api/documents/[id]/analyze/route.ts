@@ -234,7 +234,5 @@ async function GET(
   }
 }
 
-export const postHandler = withTenantContext(POST, { requireAuth: true })
-export const getHandler = withTenantContext(GET, { requireAuth: true })
-
-export { postHandler as POST, getHandler as GET }
+export const POST = withTenantContext(POST, { requireAuth: true })
+export const GET = withTenantContext(GET, { requireAuth: true })
