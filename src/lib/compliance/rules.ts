@@ -278,13 +278,13 @@ export function calculateObligations(
     obligations.push({
       id: `wht-${entity.id}`,
       type: 'WHT',
-      country: entity.country,
+      country,
       description: 'Withholding Tax Return',
-      dueDate: calculateNextFilingDate(entity.country, 'WHT'),
+      dueDate: calculateNextFilingDate(country, 'WHT'),
       frequency: 'MONTHLY',
       status: 'PENDING',
       daysUntilDue: Math.floor(
-        (calculateNextFilingDate(entity.country, 'WHT').getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+        (calculateNextFilingDate(country, 'WHT').getTime() - Date.now()) / (1000 * 60 * 60 * 24)
       ),
       requiresDocumentation: true,
       automationSupported: false,
@@ -296,9 +296,9 @@ export function calculateObligations(
     obligations.push({
       id: `einv-${entity.id}`,
       type: 'E_INVOICE',
-      country: entity.country,
+      country,
       description: 'E-Invoicing Compliance',
-      dueDate: calculateNextFilingDate(entity.country, 'E_INVOICE'),
+      dueDate: calculateNextFilingDate(country, 'E_INVOICE'),
       frequency: 'ON_DEMAND',
       status: 'PENDING',
       daysUntilDue: 0,
