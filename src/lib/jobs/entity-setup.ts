@@ -398,6 +398,18 @@ async function createManualReviewCase(
 
     // Create a support case/message thread
     // This would integrate with the messaging system once it's built
+    await prisma.auditEvent.create({
+      data: {
+        tenantId: entity.tenantId,
+        userId: "system",
+        type: "entity.manual_review_case_created",
+        resource: "entity",
+        details: {
+          entityId,
+          reason,
+        },
+      },
+    });
     logger.info("Manual review case created for entity", {
       entityId,
       reason,
