@@ -170,7 +170,7 @@ export class InvitationService {
 
         // Link to entities if specified
         if (inv.entityIds && inv.entityIds.length > 0) {
-          await tx.userEntity.createMany({
+          await tx.userOnEntity.createMany({
             data: inv.entityIds.map((entityId) => ({
               userId,
               entityId,
